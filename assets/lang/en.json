@@ -1,0 +1,31 @@
+{   
+   "categories" : [
+        "All Categories",
+        "Quran",
+        "Tafseer",
+        "Rewayat Warsh A’n Nafi’",
+        "Rewayat Qalon A’n Nafi’",
+        "Other Rewayat",
+        "Roqyah",
+        "Adhkar",
+        "Fatwas",
+        "Biography of the Prophet",
+        "Translation"
+      ],
+    "title": "Quran Station C",
+    "Search": "Search...",
+    "NowPlaying": "Now Playing",
+    "Radio Stations":"Stations",
+    "SahabaStories":"Sahaba Stories",
+    "Fav":"Favourites",
+    "Browse":"Browse",
+    "Settings":"Settings",
+    "Category":"Category",
+    "Apply":"Apply",
+    "AddNotif":"Added to",
+    "DeleteNotif":"Deleted From",
+    "Favourites":"Favourites",
+    "Loading":"Loading",
+    "Empty":"No Results"
+
+  }
