@@ -8,7 +8,8 @@ A mobile client for https://quran-station.com, built with Flutter.
 - Filtering  
 - Favourites  
 - Custom playlists  
-- Audio controller  
+- Audio controller
+- Arabic and English Languages  
 
 ## Planned Features
 - Background audio playback  
