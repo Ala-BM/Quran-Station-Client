@@ -1,16 +1,18 @@
-# theway
+# Quran Station Client
 
-A new Flutter project.
+A mobile client for https://quran-station.com, built with Flutter.
 
-## Getting Started
+## Features
+- Simple and responsive UI  
+- Auto playlist  
+- Filtering  
+- Favourites  
+- Custom playlists  
+- Audio controller
+- Arabic and English Languages  
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Planned Features
+- Background audio playback  
+- Improved playlist management  
+- Settings screen  
+- Enhanced UI  
