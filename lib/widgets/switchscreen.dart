@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:theway/l10n/app_localizations.dart';
 
 class Switchscreen extends StatefulWidget {
   const Switchscreen({super.key});
@@ -9,6 +10,8 @@ class _SwitchState extends State<Switchscreen> {
   Widget build(BuildContext context){
       return  Container(
             color:const Color.fromARGB(255, 4, 0, 255),
+            child:Directionality(
+            textDirection: TextDirection.ltr,
             child: BottomNavigationBar(
               
               items: [
@@ -16,23 +19,23 @@ class _SwitchState extends State<Switchscreen> {
                   icon:IconButton(
                   onPressed: () {/*gjfkl*/},
                   icon:const  Icon(Icons.music_note)),
-                  label: "Listen",),
+                  label: AppLocalizations.of(context)!.translate("Fav"),),
               BottomNavigationBarItem(
                   icon:IconButton(
                   onPressed: () {/*gjfkl*/},
                   icon:const  Icon(Icons.compass_calibration)),
-                  label: "Browse",),
+                  label: AppLocalizations.of(context)!.translate("Browse"),),
               BottomNavigationBarItem(
                   icon:IconButton(
                   onPressed: () {/*gjfkl*/},
                   icon:const  Icon(Icons.settings)),
-                  label: "Settings",),
+                  label:AppLocalizations.of(context)!.translate("Settings") ,),
               ],
           
 
             ),
 
 
-      );
+      ));
   }
 }

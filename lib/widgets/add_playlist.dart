@@ -27,9 +27,9 @@ class AddPlaylist extends StatelessWidget {
       
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            "Input Playlist Name",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            AppLocalizations.of(context)!.translate("inputMsg"),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           TextField(
@@ -54,7 +54,7 @@ class AddPlaylist extends StatelessWidget {
               Navigator.pop(context);
             },
             icon: const Icon(Icons.check),
-            label: const Text("Apply"),
+            label: Text(AppLocalizations.of(context)!.translate("Apply")),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
               shape: RoundedRectangleBorder(

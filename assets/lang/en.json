@@ -26,6 +26,7 @@
     "DeleteNotif":"Deleted From",
     "Favourites":"Favourites",
     "Loading":"Loading",
-    "Empty":"No Results"
+    "Empty":"No Results",
+    "inputMsg":"Input Playlist Name"
 
   }

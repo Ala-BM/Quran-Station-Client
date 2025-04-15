@@ -43,7 +43,7 @@ class _PlayerscreenState extends State<Playerscreen> {
         audioManager = context.read<AudioManager>();
             currentAudio = audioManager.currentAudio;
     if (!_isInitialized) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(), // Show loading indicator
         ),

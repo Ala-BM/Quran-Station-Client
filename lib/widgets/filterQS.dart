@@ -84,50 +84,109 @@ class _FilterqsState extends State<Filterqs> {
                     left: 20, right: 20, bottom: 20, top: 10),
                 child: Directionality(
                     textDirection: TextDirection.ltr,
-                    child: Row(
-                      children: [
-                        Expanded(
-                            child: ElevatedButton(
-                                onPressed: () =>
-                                    widget.scraper.station.value = false,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: widget.scraper.station.value
-                                      ? Colors.grey
-                                      : Colors.blue,
-                                  foregroundColor: widget.scraper.station.value
-                                      ? Colors.black
-                                      : Colors.white,
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(4),
-                                        bottomLeft:
-                                            Radius.circular(4)), // Sharp edges
-                                  ),
-                                ),
-                                child: Text(AppLocalizations.of(context)!
-                                    .translate("SahabaStories")))),
-                        Expanded(
-                            child: ElevatedButton(
-                          onPressed: () => widget.scraper.station.value = true,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: widget.scraper.station.value
-                                ? Colors.blue
-                                : Colors.grey,
-                            foregroundColor: widget.scraper.station.value
-                                ? Colors.white
-                                : Colors.black,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(4),
-                                  bottomRight:
-                                      Radius.circular(4)), // Sharp edges
-                            ),
-                          ),
-                          child: Text(AppLocalizations.of(context)!
-                              .translate("Radio Stations")),
-                        ))
-                      ],
-                    )),
+                    child:  ValueListenableBuilder<bool>(
+  valueListenable: widget.scraper.station,
+  builder: (context, isStation, _) {
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Stack(
+        children: [
+          // Gray backgrounds
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: !isStation ? Colors.grey : Colors.grey[300],
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(4),
+                      bottomLeft: Radius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isStation ? Colors.grey : Colors.grey[300],
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(4),
+                      bottomRight: Radius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Sliding blue box
+          AnimatedAlign(
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment:
+                isStation ? Alignment.centerRight : Alignment.centerLeft,
+            child: FractionallySizedBox(
+              widthFactor: 0.5,
+              heightFactor: 1.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ),
+
+          // Clickable buttons (full width)
+          Row(
+            children: [
+              Expanded(
+  child: GestureDetector(
+    onTap: () => widget.scraper.station.value = false,
+    // Ensures it fills the space
+      child: Container(
+         color: Colors.transparent, 
+        alignment: Alignment.center,
+        child: Text(
+          AppLocalizations.of(context)!.translate("SahabaStories"),
+          style: TextStyle(
+            color: isStation ? Colors.black : Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+  ),
+),
+
+              Expanded(
+  child: GestureDetector(
+    onTap: () => widget.scraper.station.value = true,
+    child: Container(
+      color: Colors.transparent,  // Important to make sure the whole area is tappable
+      alignment: Alignment.center,
+      child: Text(
+        AppLocalizations.of(context)!.translate("Radio Stations"),
+        style: TextStyle(
+          color: isStation ? Colors.white : Colors.black,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+  ),
+),
+
+
+            ],
+          ),
+        ],
+      ),
+    );
+  },
+),
+),
               ),
               widget.scraper.station.value
                   ? Container(
