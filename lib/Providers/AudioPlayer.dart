@@ -131,7 +131,6 @@ class AudioManager extends ChangeNotifier {
 
       print("Download complete: Cached at $filePath");
 
-      // 🔄 Switch to cached file without restarting playback
       if (audioPlayer.playing) {
         final position = audioPlayer.position;
         await audioPlayer.setFilePath(filePath);
