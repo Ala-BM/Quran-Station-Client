@@ -1,5 +1,5 @@
 import 'dart:async';
-
+//import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:theway/Classes/AudioPlayer.dart';
@@ -7,6 +7,7 @@ import 'package:theway/l10n/app_localizations.dart';
 import '../Classes/KhinsiderAlbums.dart';
 import '../Services/qsscrapper.dart';
 import 'filterQS.dart';
+//import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +32,7 @@ class _QslistState extends State<Qslist> {
   @override
   void initState() {
     super.initState();
+      _audioManager = Provider.of<AudioManager>(context, listen: false);
     currentCat ="All Categories";
     srcAudios = scraper.fetchDataQSstations();
     srcAudios.then((audios) {
@@ -40,48 +42,40 @@ class _QslistState extends State<Qslist> {
       });
     });
     scraper.station.addListener(() {
-      setState(() {}); // Forces UI to update when category changes
+      setState(() {}); 
     });
   }
+/*Future<bool> isConnected() async {
+  final connectivityResult = await Connectivity().checkConnectivity();
+  if (connectivityResult == ConnectivityResult.none) {
+    return false;
+  }
 
+  try {
+    final result = await InternetAddress.lookup('example.com');
+    return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+  } on SocketException catch (_) {
+    return false;
+  }
+}*/
 Future<void> sourceChange() async {
   if (scraper.station.value == true) {
     srcAudios = Qsscrapper().fetchDataQSstations();
-    await srcAudios.then((audios) { // Ensure `await` before proceeding
-      setState(() {
-        allAudios = audios;
-        filteredAudios = List.from(allAudios);
-      });
-    });
   } else {
     srcAudios = Qsscrapper().fetchDataQS();
-    await srcAudios.then((audios) { // Ensure `await` before proceeding
-      setState(() {
-        currentCat = "All Categories";
-        allAudios = audios;
-        filteredAudios = List.from(allAudios);
-      });
-    });
   }
+  
+  final audios = await srcAudios;
+  if (!mounted) return; 
+  
+  setState(() {
+    allAudios = audios;
+    filteredAudios = List.from(allAudios);
+    if (!scraper.station.value) {
+      currentCat = "All Categories";
+    }
+  });
 }
-
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-   
-    _audioManager = Provider.of<AudioManager>(context, listen: false);
-
-    _audioSubscription?.cancel();
-    _audioSubscription =
-        _audioManager.audioPlayer.playerStateStream.listen((state) {
-      if (!mounted) return;
-      setState(() {
-        final currentUrl = _audioManager.currentAudio?.audiolink;
-        playingIndex = _findPlayingIndex(currentUrl);
-      });
-    });
-  }
 
   @override
   void dispose() {
@@ -143,7 +137,6 @@ Future<void> sourceChange() async {
 
   @override
   Widget build(BuildContext context) {
-    final audioManager = Provider.of<AudioManager>(context);
     return Scaffold(
         body: Stack(
       children: [
@@ -158,14 +151,21 @@ Future<void> sourceChange() async {
               return Center(child: Text(AppLocalizations.of(context)!.translate("Empty")));
             }
 
-            return Scrollbar(
+            return Consumer<AudioManager>( builder: (context, audioManager, child){
+            
+           return Scrollbar(
                 child: ListView.builder(
               padding: const EdgeInsets.only(top: 120, bottom: 120),
               itemCount: filteredAudios.length,
               itemBuilder: (context, index) {
+                      final currentUrl = audioManager.currentAudio?.audiolink;
+                      final isPlayingIndex = currentUrl != null && 
+                          filteredAudios[index].audiolink == currentUrl;
+                      final isPlaying = isPlayingIndex && audioManager.isPlaying;
+                      final isLoading = isPlayingIndex && audioManager.isLoading;
                 return GestureDetector(
                   onTap: () {
-                    if (playingIndex != index) {
+                    if (!isPlayingIndex) {
                       audioManager.playAudio(filteredAudios[index]);
                     } else {
                       audioManager.togglePlayPause();
@@ -177,7 +177,7 @@ Future<void> sourceChange() async {
                     margin:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      gradient: playingIndex == index
+                      gradient: isPlayingIndex
                           ? LinearGradient(
                               colors: [
                                 Colors.blue.shade700,
@@ -205,7 +205,7 @@ Future<void> sourceChange() async {
                     ),
                     child: Row(
                       children: [
-                            audioManager.isLoading && playingIndex == index ?        const SizedBox(
+                            isLoading ?        const SizedBox(
                   width: 30,
                   height: 30,
                   child: CircularProgressIndicator(color: Colors.white),
@@ -213,11 +213,11 @@ Future<void> sourceChange() async {
                         Icon(
                          
                           
-                          (playingIndex == index && _audioManager.isPlaying)
+                          (isPlaying)
                               ? Icons.pause_circle_filled
                               : Icons.play_circle_filled,
                           size: 30,
-                          color: playingIndex == index
+                          color: isPlayingIndex
                               ? Colors.white
                               : Colors.black,
                         ),
@@ -232,7 +232,7 @@ Future<void> sourceChange() async {
                                 : filteredAudios[index].audioname,
                             style: TextStyle(
                               fontSize: 16,
-                              color: playingIndex == index
+                              color: isPlayingIndex
                                   ? Colors.white
                                   : Colors.black,
                               fontWeight: FontWeight.w600,
@@ -246,7 +246,7 @@ Future<void> sourceChange() async {
                   ),
                 );
               },
-            ));
+            ));});
           },
         ),
         Directionality(

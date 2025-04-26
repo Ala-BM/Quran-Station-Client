@@ -6,6 +6,7 @@ import '../Services/hive_service.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:theway/l10n/app_localizations.dart';
 import '../Classes/AudioPlayer.dart';
+import 'package:theway/widgets/live_indicator.dart';
 
 class PlayerScreen extends StatefulWidget {
   const PlayerScreen({super.key});
@@ -18,26 +19,28 @@ class _PlayerScreenState extends State<PlayerScreen> {
   bool _isSeeking = false;
   double _sliderValue = 0.0;
 
-  void _showPlaylists(BuildContext context,KhinAudio selectedAudio) {
-showDialog(
-  context: context,
-  builder: (context) {
-    return Dialog( 
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: PlaylistMg(
-        selectedAudio: selectedAudio,
-      ),
+  void _showPlaylists(BuildContext context, KhinAudio selectedAudio) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: PlaylistMg(
+            selectedAudio: selectedAudio,
+          ),
+        );
+      },
     );
-  },
-);
   }
+
   @override
   Widget build(BuildContext context) {
     final audioManager = Provider.of<AudioManager>(context);
     final hiveManager = Provider.of<HiveService>(context);
-
+   final duration =
+                  audioManager.audioPlayer.duration ?? Duration.zero;
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
@@ -72,7 +75,12 @@ showDialog(
                       );
                       print("Settings pressed");
                     }),
-          IconButton(icon :const Icon(Icons.playlist_add), onPressed: () { _showPlaylists(context,audioManager.currentAudio!) ;},),
+          IconButton(
+            icon: const Icon(Icons.playlist_add),
+            onPressed: () {
+              _showPlaylists(context, audioManager.currentAudio!);
+            },
+          ),
         ],
       ),
       body: Column(
@@ -94,29 +102,29 @@ showDialog(
                 ],
               ),
               child: ClipRRect(
-  borderRadius: BorderRadius.circular(16),
-  child: Stack(
-    alignment: Alignment.center,
-    children: [
-      Image.network(
-        audioManager.currentAudio?.albumImg ?? '',
-        width: 250,
-        height: 250,
-        fit: BoxFit.cover,
-      ),
-      if (audioManager.isLoading)
-        Container(
-          width: 250,
-          height: 250,
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.5), // Dim the image
-          ),
-        ),
-      if (audioManager.isLoading)
-        const CircularProgressIndicator(), // Loading indicator
-    ],
-  ),
-),
+                borderRadius: BorderRadius.circular(16),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Image.network(
+                      audioManager.currentAudio?.albumImg ?? '',
+                      width: 250,
+                      height: 250,
+                      fit: BoxFit.cover,
+                    ),
+                    if (audioManager.isLoading)
+                      Container(
+                        width: 250,
+                        height: 250,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5), // Dim the image
+                        ),
+                      ),
+                    if (audioManager.isLoading)
+                      const CircularProgressIndicator(), // Loading indicator
+                  ],
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -153,8 +161,6 @@ showDialog(
             stream: audioManager.audioPlayer.positionStream,
             builder: (context, snapshot) {
               final position = snapshot.data ?? Duration.zero;
-              final duration =
-                  audioManager.audioPlayer.duration ?? Duration.zero;
               final buffered = audioManager.audioPlayer.bufferedPosition;
 
               if (!_isSeeking) {
@@ -200,7 +206,7 @@ showDialog(
                                   audioManager.audioPlayer.seek(newDuration);
                                 },
                               )))
-                      : const SizedBox(width: 10),
+                      : const LiveIndicator(),
 
                   // Time indicators
                 ],
@@ -212,6 +218,7 @@ showDialog(
 
           // Playback Controls
           Row(
+            
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
@@ -220,14 +227,14 @@ showDialog(
                     color: audioManager.isShuffle
                         ? const Color.fromARGB(255, 125, 86, 254)
                         : const Color.fromARGB(255, 101, 101, 102)),
-                onPressed: audioManager.toggleShuffle,
+                onPressed: duration != Duration.zero ? audioManager.toggleShuffle :null,
               ),
               const SizedBox(width: 20),
               IconButton(
                 iconSize: 40,
                 icon: const Icon(Icons.skip_previous,
                     color: Color.fromARGB(255, 125, 86, 254)),
-                onPressed: audioManager.playPrevAudio,
+                onPressed:  audioManager.playPrevAudio,
               ),
               const SizedBox(width: 20),
               IconButton(
@@ -254,7 +261,7 @@ showDialog(
                     color: audioManager.isRepeat
                         ? const Color.fromARGB(255, 125, 86, 254)
                         : const Color.fromARGB(255, 101, 101, 102)),
-                onPressed: audioManager.toggleRepeat,
+                onPressed:duration != Duration.zero ? audioManager.toggleRepeat : null,
               ),
             ],
           ),

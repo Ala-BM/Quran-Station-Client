@@ -2,10 +2,8 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
-import '../Services/KhinsiderScrapper.dart';
-import 'KhinsiderAlbums.dart';
+import '../Providers/KhinsiderAlbums.dart';
 
 class AudioManager extends ChangeNotifier {
   final AudioPlayer audioPlayer = AudioPlayer();
@@ -87,22 +85,20 @@ class AudioManager extends ChangeNotifier {
     }
     try {
       final _url;
-      print("yeah so this is the link ${audio?.audiolink}");
+      //print("yeah so this is the link ${audio?.audiolink}");
       setLoading(true);
-      if(audio!.audiolink.contains("khinsider")){
+      /*if(audio!.audiolink.contains("khinsider")){
         _url = await fetchLink(audio.audiolink);
-      } else {
-        _url=audio.audiolink;
-      }
+      } else {*/
+        _url=audio?.audiolink;
+     // used to track khinsider audio ,abandoned for now }
       
       _currentAudio = audio;
       final directory = await getApplicationDocumentsDirectory();
       final filePath =
-          "${directory.path}/${Uri.parse(audio.id).pathSegments.last}";
+          "${directory.path}/${Uri.parse(audio!.id).pathSegments.last}";
       final file = File(filePath);
-      print("Its here or should be $filePath");
       if (file.existsSync()) {
-        print("Playing from cache: $filePath");
         await audioPlayer.setFilePath(filePath);
         audioPlayer.play();
         _isPlaying = true;
@@ -113,7 +109,7 @@ class AudioManager extends ChangeNotifier {
         audioPlayer.play();
         _isPlaying = true;
         notifyListeners();
-        //cacheAudio(_url, filePath); // Start caching in the background
+        //cacheAudio(_url, filePath); // Start caching in the background , need condition on live audio
       }
     } catch (e) {
       print("Error playing audio: $e");
@@ -122,7 +118,7 @@ class AudioManager extends ChangeNotifier {
     }
   }
 
-  void cacheAudio(String url, String filePath) async {
+  /*void cacheAudio(String url, String filePath) async {
     final file = File(filePath);
 
     if (!file.existsSync()) {
@@ -143,7 +139,7 @@ class AudioManager extends ChangeNotifier {
         print("Switched to cached file!");
       }
     }
-  }
+  }*/
 
   void pauseAudio() {
     audioPlayer.pause();
@@ -162,7 +158,6 @@ class AudioManager extends ChangeNotifier {
     final currentPlaying = audioPlayer.sequenceState?.currentSource;
     if (currentPlaying is ProgressiveAudioSource) {
       String? currentUrl = currentPlaying.uri.toString();
-      print(currentUrl);
       if (currentUrl == audio) {
         return true;
       }
@@ -182,13 +177,12 @@ class AudioManager extends ChangeNotifier {
 
 void handleSongEnd() {
   if(isRepeat){
-    print("It reaches here ");
       audioPlayer.seek(Duration.zero);
       return;
     }else {
   if (_playlist.length == 1) {
     pauseAudio(); 
-    return;  // Prevent looping
+    return; 
   }
 
   // Ensure we only play next if the player is actually done
@@ -206,8 +200,8 @@ void handleSongEnd() {
   {
     int newIndex;
   do {
-    newIndex = Random().nextInt(_playlist.length); // Pick a random index
-  } while (newIndex == _currentIndex); // Repeat if it's the same as the current one
+    newIndex = Random().nextInt(_playlist.length);
+  } while (newIndex == _currentIndex); 
 
   return newIndex;
   }
