@@ -132,7 +132,6 @@ _audioHandler?.handleSongEnd();
     return _audioHandler?.checkPlaying(audioId) ?? false;
   }
 
-<<<<<<< HEAD
   bool get isShuffle => _audioHandler?.isShuffle ?? false;
   bool get isRepeat => _audioHandler?.isRepeat ?? false;
   
@@ -144,14 +143,6 @@ _audioHandler?.handleSongEnd();
     if (!_isInitializing) {
       print("Triggering initialization...");
       await _initAudioService();
-=======
-      if (audioPlayer.playing) {
-        final position = audioPlayer.position;
-        await audioPlayer.setFilePath(filePath);
-        audioPlayer.seek(position);
-        print("Switched to cached file!");
-      }
->>>>>>> 5c59ece3efbe65697d064afb7fdd737c96b084ce
     }
     
     final stopwatch = Stopwatch()..start();
