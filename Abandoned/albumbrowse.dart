@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../Classes/KhinsiderAlbums.dart';
-import '../Services/KhinsiderScrapper.dart';
+import 'package:theway/Providers/KhinsiderAlbums.dart';
+import 'package:theway/Services/KhinsiderScrapper.dart';
 import 'animatedImageContainer.dart';
 
 
@@ -16,6 +16,7 @@ class Albumbrowse extends StatefulWidget {
 
 class _AlbumbrowseState extends State<Albumbrowse> {
   int selectedCategoryIndex = 0;
+  @override
   Widget build(BuildContext context) {
     //double screenheight = MediaQuery.of(context).size.height;
     //double screensize=screenheight*0.8;

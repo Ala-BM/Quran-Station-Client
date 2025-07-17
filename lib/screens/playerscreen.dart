@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
-import 'package:theway/Classes/KhinsiderAlbums.dart';
+import 'package:theway/Providers/KhinsiderAlbums.dart';
+import 'package:theway/Providers/json_theme_provider.dart';
+import 'package:theway/Providers/cnx_plus_provider.dart';
 import 'package:theway/widgets/playlist_mg.dart';
-import '../Services/hive_service.dart';
+import '../Providers/hive_service.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:theway/l10n/app_localizations.dart';
-import '../Classes/AudioPlayer.dart';
+import '../Providers/AudioPlayer.dart';
 import 'package:theway/widgets/live_indicator.dart';
 
 class PlayerScreen extends StatefulWidget {
@@ -16,7 +19,7 @@ class PlayerScreen extends StatefulWidget {
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  bool _isSeeking = false;
+  final bool _isSeeking = false;
   double _sliderValue = 0.0;
 
   void _showPlaylists(BuildContext context, KhinAudio selectedAudio) {
@@ -37,117 +40,139 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final audioManager = Provider.of<AudioManager>(context);
-    final hiveManager = Provider.of<HiveService>(context);
-   final duration =
-                  audioManager.audioPlayer.duration ?? Duration.zero;
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.translate("NowPlaying")),
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        actions: [
-          IconButton(
-              icon: hiveManager.isFav(audioManager.currentAudio!)
-                  ? const Icon(Icons.favorite)
-                  : const Icon(Icons.favorite_outline),
-              onPressed: !hiveManager.isFav(audioManager.currentAudio!)
-                  ? () {
-                      hiveManager.addFavorite(audioManager.currentAudio!);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '${AppLocalizations.of(context)!.translate("AddNotif")} ${AppLocalizations.of(context)!.translate("Favourites")}',
-                          ),
-                        ),
-                      );
-                      print("Settings pressed");
-                    }
-                  : () {
-                      hiveManager
-                          .removeFavorite(audioManager.currentAudio!.audiolink);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '${AppLocalizations.of(context)!.translate("DeleteNotif")} ${AppLocalizations.of(context)!.translate("Favourites")}',
-                          ),
-                        ),
-                      );
-                      print("Settings pressed");
-                    }),
-          IconButton(
-            icon: const Icon(Icons.playlist_add),
-            onPressed: () {
-              _showPlaylists(context, audioManager.currentAudio!);
-            },
+    return Consumer3<AudioManager, HiveService, JsonThemeProvider>(
+        builder: (context, audioManager, hiveManager, themeprovider, child) {
+      final currentThemeData = themeprovider.themeData;
+      final colorScheme = currentThemeData.colorScheme;
+      final duration = audioManager.audioPlayer.duration ?? Duration.zero;
+      return Scaffold(
+        backgroundColor: colorScheme.surface,
+        appBar: AppBar(
+          title: Text(
+            AppLocalizations.of(context)!.translate("NowPlaying"),
+            style: TextStyle(color: colorScheme.secondary),
           ),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Album Art
-          Center(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3), // Shadow color
-                    blurRadius: 10, // Spread of the shadow
-                    spreadRadius: 2, // Extent of the shadow
-                    offset: const Offset(4, 4), // Shadow offset
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Image.network(
-                      audioManager.currentAudio?.albumImg ?? '',
-                      width: 250,
-                      height: 250,
-                      fit: BoxFit.cover,
+          backgroundColor: colorScheme.surface,
+          actions: [
+            IconButton(
+                icon: hiveManager.isFav(audioManager.currentAudio!)
+                    ? Icon(Icons.favorite, color: colorScheme.secondary)
+                    : Icon(Icons.favorite_outline, color: colorScheme.secondary),
+                onPressed: !hiveManager.isFav(audioManager.currentAudio!)
+                    ? () {
+                        hiveManager.addFavorite(audioManager.currentAudio!);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${AppLocalizations.of(context)!.translate("AddNotif")} ${AppLocalizations.of(context)!.translate("Favourites")}',
+                            ),
+                          ),
+                        );
+                        //print("Settings pressed");
+                      }
+                    : () {
+                        hiveManager.removeFavorite(
+                            audioManager.currentAudio!.audiolink);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${AppLocalizations.of(context)!.translate("DeleteNotif")} ${AppLocalizations.of(context)!.translate("Favourites")}',
+                            ),
+                          ),
+                        );
+
+                      }),
+            IconButton(
+              icon: Icon(Icons.playlist_add, color: colorScheme.secondary),
+              onPressed: () {
+                _showPlaylists(context, audioManager.currentAudio!);
+              },
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.shadow
+                              .withOpacity(0.3), // Shadow color
+                          blurRadius: 10, // Spread of the shadow
+                          spreadRadius: 2, // Extent of the shadow
+                          offset: const Offset(4, 4), // Shadow offset
+                        ),
+                      ],
                     ),
-                    if (audioManager.isLoading)
-                      Container(
-                        width: 250,
-                        height: 250,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5), // Dim the image
-                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Image.network(
+                            audioManager.currentAudio?.albumImg ?? '',
+                            width: 250,
+                            height: 250,
+                            fit: BoxFit.cover,
+                          ),
+                          StreamBuilder<ProcessingState>(
+                            stream:
+                                audioManager.audioPlayer.processingStateStream,
+                            builder: (context, snapshot) {
+                              final state =
+                                  snapshot.data ?? ProcessingState.idle;
+                              if (state == ProcessingState.buffering ||
+                                  state == ProcessingState.loading) {
+                                return Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Container(
+                                      width: 250,
+                                      height: 250,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            colorScheme.shadow.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    const CircularProgressIndicator()
+                                  ],
+                                );
+                              } else {
+                                return const SizedBox.shrink();
+                              }
+                            },
+                          ),
+                        ],
                       ),
-                    if (audioManager.isLoading)
-                      const CircularProgressIndicator(), // Loading indicator
-                  ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-          // Audio Title
-          Text(
-            Localizations.localeOf(context).languageCode == 'en' &&
-                    audioManager.currentAudio?.audioNameEx != null
-                ? audioManager.currentAudio!.audioNameEx!
-                : audioManager.currentAudio!.audioname,
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
+                Text(
+                  Localizations.localeOf(context).languageCode == 'en' &&
+                          audioManager.currentAudio?.audioNameEx != null
+                      ? audioManager.currentAudio!.audioNameEx!
+                      : audioManager.currentAudio!.audioname,
+                  style: TextStyle(
+                    color: colorScheme.primary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
 
-          // Artist Name
-          /*Text(
+                // Artist Name
+                /*Text(
             audioManager.currentAudio?.artist ?? "Unknown Artist",
-            style: TextStyle(
+            style: TextStyle(                      
               color: Colors.white.withOpacity(0.7),
               fontSize: 16,
             ),
@@ -155,118 +180,151 @@ class _PlayerScreenState extends State<PlayerScreen> {
           ),
           const SizedBox(height: 30),*/
 
-          // Slider with StreamBuilder
+                // Slider with StreamBuilder
 
-          StreamBuilder<Duration>(
-            stream: audioManager.audioPlayer.positionStream,
-            builder: (context, snapshot) {
-              final position = snapshot.data ?? Duration.zero;
-              final buffered = audioManager.audioPlayer.bufferedPosition;
+                StreamBuilder<Duration>(
+                  stream: audioManager.audioPlayer.positionStream,
+                  builder: (context, snapshot) {
+                    final position = snapshot.data ?? Duration.zero;
+                    final buffered = audioManager.audioPlayer.bufferedPosition;
 
-              if (!_isSeeking) {
-                _sliderValue = position.inMilliseconds.toDouble();
-              }
-              if (_sliderValue > duration.inMilliseconds.toDouble()) {
-                _sliderValue = duration.inMilliseconds.toDouble();
-              }
+                    if (!_isSeeking) {
+                      _sliderValue = position.inMilliseconds.toDouble();
+                    }
+                    if (_sliderValue > duration.inMilliseconds.toDouble()) {
+                      _sliderValue = duration.inMilliseconds.toDouble();
+                    }
 
-              return Column(
-                children: [
-                  duration != Duration.zero
-                      ? SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            trackHeight: 4.0, // Thinner track
-                            inactiveTrackColor:
-                                Colors.grey.shade600, // Background color
-                            activeTrackColor: Colors.blue, // Played progress
-                            thumbColor: Colors.white, // Thumb color
-                            overlayColor: Colors.blue.withOpacity(0.2),
-                          ),
-                          child: SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.8,
-                              child: ProgressBar(
-                                progress: Duration(
-                                    milliseconds: _sliderValue
-                                        .toInt()), // Current audio progress
-                                buffered: buffered, // Buffered progress
-                                total: duration, // Total duration
-                                progressBarColor:
-                                    Colors.blue, // Active audio progress
-                                baseBarColor: Colors
-                                    .grey.shade600, // Inactive background bar
-                                bufferedBarColor: const Color.fromARGB(
-                                    255, 214, 214, 214), // Buffered progress
-                                thumbColor: Colors.blue, // Thumb color
-                                thumbGlowColor: Colors.blue.withOpacity(0.2),
-                                onSeek: (newDuration) {
-                                  setState(() {
-                                    _sliderValue =
-                                        newDuration.inMilliseconds.toDouble();
-                                  });
-                                  audioManager.audioPlayer.seek(newDuration);
-                                },
-                              )))
-                      : const LiveIndicator(),
-
-                  // Time indicators
-                ],
-              );
-            },
-          ),
-
-          const SizedBox(height: 20),
-
-          // Playback Controls
-          Row(
-            
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                iconSize: 30,
-                icon: Icon(Icons.shuffle,
-                    color: audioManager.isShuffle
-                        ? const Color.fromARGB(255, 125, 86, 254)
-                        : const Color.fromARGB(255, 101, 101, 102)),
-                onPressed: duration != Duration.zero ? audioManager.toggleShuffle :null,
-              ),
-              const SizedBox(width: 20),
-              IconButton(
-                iconSize: 40,
-                icon: const Icon(Icons.skip_previous,
-                    color: Color.fromARGB(255, 125, 86, 254)),
-                onPressed:  audioManager.playPrevAudio,
-              ),
-              const SizedBox(width: 20),
-              IconButton(
-                iconSize: 60,
-                icon: Icon(
-                  audioManager.isPlaying
-                      ? Icons.pause_circle
-                      : Icons.play_circle,
-                  color: Colors.blue,
+                    return Column(
+                      children: [
+                        duration != Duration.zero
+                            ? SliderTheme(
+                                data: SliderTheme.of(context).copyWith(
+                                  trackHeight: 4.0, // Thinner track
+                                  inactiveTrackColor: colorScheme.inversePrimary, // Background color
+                                  activeTrackColor:
+                                      colorScheme.primary, // Played progress
+                                  thumbColor:
+                                      colorScheme.secondary, // Thumb color
+                                  overlayColor:
+                                      colorScheme.primary.withOpacity(0.2),
+                                ),
+                                child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.8,
+                                    child: ProgressBar(
+                                      progress: Duration(
+                                          milliseconds: _sliderValue.toInt()),
+                                      buffered: buffered,
+                                      total: duration,
+                                      progressBarColor: colorScheme.primary,
+                                      baseBarColor:
+                                          colorScheme.onInverseSurface,
+                                      bufferedBarColor:
+                                          colorScheme.inversePrimary,
+                                      thumbColor: colorScheme.primary,
+                                      thumbGlowColor:
+                                          colorScheme.inversePrimary,
+                                      onSeek: (newDuration) {
+                                        setState(() {
+                                          _sliderValue = newDuration
+                                              .inMilliseconds
+                                              .toDouble();
+                                        });
+                                        audioManager.audioPlayer
+                                            .seek(newDuration);
+                                      },
+                                    )))
+                            : audioManager.AError!="none" ? Text(AppLocalizations.of(context)!.translate("ErrorSrc")) : audioManager.isLoading ? Text(AppLocalizations.of(context)!.translate("Loading")) : const LiveIndicator(),
+                      ],
+                    );
+                  },
                 ),
-                onPressed: audioManager.togglePlayPause,
-              ),
-              const SizedBox(width: 20),
-              IconButton(
-                iconSize: 40,
-                icon: const Icon(Icons.skip_next,
-                    color: Color.fromARGB(255, 125, 86, 254)),
-                onPressed: audioManager.playNextAudio,
-              ),
-              const SizedBox(width: 20),
-              IconButton(
-                iconSize: 30,
-                icon: Icon(Icons.repeat_one,
-                    color: audioManager.isRepeat
-                        ? const Color.fromARGB(255, 125, 86, 254)
-                        : const Color.fromARGB(255, 101, 101, 102)),
-                onPressed:duration != Duration.zero ? audioManager.toggleRepeat : null,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+
+                const SizedBox(height: 20),
+                Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          iconSize: 30,
+                          icon: Icon(Icons.shuffle,
+                              color: audioManager.isShuffle
+                                  ? colorScheme.secondary
+                                  : colorScheme.primaryFixedDim),
+                          onPressed: duration != Duration.zero
+                              ? audioManager.toggleShuffle
+                              : null,
+                        ),
+                        const SizedBox(width: 20),
+                        IconButton(
+                          iconSize: 40,
+                          icon: Icon(Icons.skip_previous,
+                              color: colorScheme.secondary),
+                          onPressed: audioManager.playPrevAudio,
+                        ),
+                        const SizedBox(width: 20),
+                        IconButton(
+                          iconSize: 60,
+                          icon: Icon(
+                            audioManager.isPlaying
+                                ? Icons.pause_circle
+                                : Icons.play_circle,
+                            color: audioManager.AError!="none" ? colorScheme.primary.withOpacity(0.5):colorScheme.primary,
+                          ),
+                          onPressed:audioManager.AError!="none" ? null : audioManager.togglePlayPause,
+                        ),
+                        const SizedBox(width: 20),
+                        IconButton(
+                          iconSize: 40,
+                          icon:
+                              Icon(Icons.skip_next, color: colorScheme.secondary),
+                          onPressed: audioManager.playNextAudio,
+                        ),
+                        const SizedBox(width: 20),
+                        IconButton(
+                          iconSize: 30,
+                          icon: Icon(Icons.repeat_one,
+                              color: audioManager.isRepeat
+                                  ? colorScheme.secondary
+                                  : colorScheme.secondaryFixedDim),
+                          onPressed: duration != Duration.zero
+                              ? audioManager.toggleRepeat
+                              : null,
+                        ),
+                      ],
+                    )),
+              ],
+            ),
+            Consumer<ConnectionProvider>(
+              builder: (context, cnxProvider, child) {
+                if (!cnxProvider.isConnected) {
+                  return Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      color: colorScheme.primaryFixedDim,
+                      padding: const EdgeInsets.all(8),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.cloud_off, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text("You're offline",
+                              style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

@@ -28,7 +28,7 @@ class _MovingTextState extends State<MovingText> with SingleTickerProviderStateM
     super.initState();
     _scrollController = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _checkOverflow();
+      _checkOverflow();
       if (_isOverflowing) {
         print("??????");
         _startScrolling();

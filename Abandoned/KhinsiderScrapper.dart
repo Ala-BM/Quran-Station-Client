@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser;
-import '../Classes/KhinsiderAlbums.dart';
+import 'package:theway/Providers/KhinsiderAlbums.dart';
 
 Future<List<Album>> fetchAlbums() async {
   const url = 'https://downloads.khinsider.com/game-soundtracks';
@@ -85,7 +85,7 @@ Future<String> fetchLink(String audioUrl) async {
   final response = await http.get(Uri.parse(audioUrl));
   if (response.statusCode == 200) {
     final document = html_parser.parse(response.body);
-    final audio = document.querySelector('audio')?.attributes['src'] ?? 'No Audio available';;
+    final audio = document.querySelector('audio')?.attributes['src'] ?? 'No Audio available';
     return audio;
    } else {
     throw Exception('Failed to load audio');

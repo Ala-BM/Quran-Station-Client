@@ -1,208 +1,204 @@
-import 'dart:io';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:audio_service/audio_service.dart';
+import 'audio_handler.dart';
 import '../Providers/KhinsiderAlbums.dart';
 
 class AudioManager extends ChangeNotifier {
-  final AudioPlayer audioPlayer = AudioPlayer();
-  KhinAudio? _currentAudio;
-  bool _isPlaying = false;
-  bool _isLoading = false;
-  bool _isBuffering = false;
+  MyAudioHandler? _audioHandler;
+  bool _isInitialized = false;
+  bool _isInitializing = false;
 
-  KhinAudio? get currentAudio => _currentAudio;
-  bool get isPlaying => _isPlaying;
-  bool get isLoading => _isLoading;
-  bool get isBuffering => _isBuffering;
-  List<KhinAudio> _playlist = [];
-  int _currentIndex = 0;
-  void setLoading(bool value) {
-    _isLoading = value;
-    notifyListeners();
+  AudioManager() {
+    _initAudioService();
   }
 
+  bool get isInitialized => _isInitialized;
 
-  bool isShuffle = false;
-  bool isRepeat = false;
+  Future<void> _initAudioService() async {
 
-
-
-  void toggleShuffle() {
-    isShuffle = !isShuffle;
-    notifyListeners();
+    if (_isInitialized || _isInitializing) return;
+    
+    _isInitializing = true;
+    print("Starting audio service initialization...");
+    
+    try {
+      final handler = await AudioService.init(
+        builder: () {
+          print("Building audio handler...");
+          return MyAudioHandler();
+        },
+        config:  const AudioServiceConfig(
+          androidNotificationChannelId: 'com.example.theway.audio',
+          androidNotificationChannelName: 'Audio Player',
+          androidNotificationOngoing: true,
+          androidStopForegroundOnPause: true,
+        ),
+      );
+      
+      print("Audio handler created successfully!");
+      _audioHandler = handler;
+      _audioHandler!.isPlayingStream.addListener(() {
+        print("Play state changed: ${_audioHandler!.isPlayingStream.value}");
+        notifyListeners();
+      });
+      
+      _audioHandler!.isLoadingStream.addListener(() {
+        print("Loading state changed: ${_audioHandler!.isLoadingStream.value}");
+        notifyListeners();
+      });
+      
+      _audioHandler!.isBufferingStream.addListener(() {
+        print("Buffer state changed: ${_audioHandler!.isBufferingStream.value}");
+        notifyListeners();
+      });
+      
+      _audioHandler!.currentAudioStream.addListener(() {
+        print("Current audio changed: ${_audioHandler!.currentAudioStream.value?.audioname}");
+        notifyListeners();
+      });
+         _audioHandler!.currentAudioStream.addListener(() {
+        print("Current audio changed: ${_audioHandler!.currentAudioStream.value?.audioname}");
+        notifyListeners();
+      });
+       _audioHandler!.isError.addListener(() {
+        print("Error: ${_audioHandler!.isError.value}");
+        notifyListeners();
+      });
+      
+      _isInitialized = true;
+      _isInitializing = false;
+      print("Audio service initialization complete!");
+      notifyListeners();
+    } catch (e) {
+      _isInitializing = false;
+      print("Error initializing audio service: $e");
+      Future.delayed(const Duration(seconds: 2), _initAudioService);
+    }
   }
-
-  void toggleRepeat() {
-    isRepeat = !isRepeat;
-    notifyListeners();
-  }
+  
+  AudioPlayer get audioPlayer => _audioHandler?.player ?? AudioPlayer();
+  KhinAudio? get currentAudio => _audioHandler?.currentAudio;
+  String? get AError => _audioHandler?.isError.value ;
+  bool get isPlaying => _audioHandler?.isPlaying ?? false;
+  bool get isLoading => _audioHandler?.isLoading ?? false;
+  bool get isBuffering => _audioHandler?.isBufferingStream.value ?? false;
 
   Future<void> loadPlaylist(List<KhinAudio> audios) async {
-    _playlist = audios;
-    _currentIndex = 0;
-    if (_playlist.isNotEmpty) {
-      await playAudio(_playlist[_currentIndex]);
-    }
+    await _ensureInitialized();
+    return _audioHandler?.loadPlaylist(audios) ?? Future.value();
   }
-  //Play Next Audio
-  Future<void> playNextAudio  () async{
-    if(isShuffle){
-// Repeat if it's the same as the current one
-      _currentIndex = randomShuffle(_currentIndex);
-
-    }
-    if(_currentIndex <_playlist.length -1){
-      _currentIndex++;
-      await playAudio(_playlist[_currentIndex]);
-    }
-     else   if(_currentIndex ==_playlist.length -1){
-      _currentIndex=0;
-      await playAudio(_playlist[_currentIndex]);
-    } 
-  }
-    Future<void> playPrevAudio  () async{
-    if(_currentIndex > 0){
-      _currentIndex--;
-      await playAudio(_playlist[_currentIndex]);
-    }
-     else   if(_currentIndex ==0 && _playlist.isNotEmpty){
-      _currentIndex=_playlist.length -1;
-      await playAudio(_playlist[_currentIndex]);
-    } 
-  }
-  // Play a new audio
+  
   Future<void> playAudio(KhinAudio? audio) async {
-    if (_playlist.contains(audio)){//change index to the current audio
-    print("IndexBEFORE£$_currentIndex");//THIS IS NOT WORKING
-    _currentIndex=_playlist.indexWhere((item)=>item==audio);
-    print("IndexAfter$_currentIndex");}
-    else {
-      //add audio to playlist
-      _playlist.add(audio!);
-      _currentIndex=_playlist.length-1;
-    }
-    try {
-      final _url;
-      //print("yeah so this is the link ${audio?.audiolink}");
-      setLoading(true);
-      /*if(audio!.audiolink.contains("khinsider")){
-        _url = await fetchLink(audio.audiolink);
-      } else {*/
-        _url=audio?.audiolink;
-     // used to track khinsider audio ,abandoned for now }
-      
-      _currentAudio = audio;
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath =
-          "${directory.path}/${Uri.parse(audio!.id).pathSegments.last}";
-      final file = File(filePath);
-      if (file.existsSync()) {
-        await audioPlayer.setFilePath(filePath);
-        audioPlayer.play();
-        _isPlaying = true;
-        notifyListeners();
-      } else {
-        print("Streaming while caching...");
-        await audioPlayer.setUrl(_url);
-        audioPlayer.play();
-        _isPlaying = true;
-        notifyListeners();
-        //cacheAudio(_url, filePath); // Start caching in the background , need condition on live audio
-      }
-    } catch (e) {
-      print("Error playing audio: $e");
-    } finally {
-      setLoading(false);
-    }
+    await _ensureInitialized();
+    return _audioHandler?.playAudio(audio) ?? Future.value();
+  }
+  
+  Future<void> playNextAudio() async {
+    await _ensureInitialized();
+    return _audioHandler?.playNext() ?? Future.value();
+  }
+  
+  Future<void> playPrevAudio() async {
+    await _ensureInitialized();
+    return _audioHandler?.playPrevious() ?? Future.value();
+  }
+  
+  Future<void> pauseAudio() async {
+    await _ensureInitialized();
+    _audioHandler?.pauseAudio();
+  }
+  
+  Future<void> stopAudio() async {
+    await _ensureInitialized();
+    _audioHandler?.stopAudio();
+  }
+  
+  Future<void> togglePlayPause() async {
+    await _ensureInitialized();
+    _audioHandler?.togglePlayPause();
   }
 
-  /*void cacheAudio(String url, String filePath) async {
-    final file = File(filePath);
+   Future<void> handleSongEnd() async {
 
-    if (!file.existsSync()) {
-      print("Downloading and caching audio...");
+ await _ensureInitialized();
 
-      await Dio().download(url, filePath, onReceiveProgress: (received, total) {
-        double progress = (received / total) * 100;
-        print("Caching: $progress%");
-      });
+_audioHandler?.handleSongEnd();
 
-      print("Download complete: Cached at $filePath");
+ }
+  
+  Future<bool> checkPlaying(String audioId) async {
+    await _ensureInitialized();
+    return _audioHandler?.checkPlaying(audioId) ?? false;
+  }
 
-      // 🔄 Switch to cached file without restarting playback
-      if (audioPlayer.playing) {
-        final position = audioPlayer.position;
-        await audioPlayer.setFilePath(filePath);
-        audioPlayer.seek(position);
-        print("Switched to cached file!");
-      }
+  bool get isShuffle => _audioHandler?.isShuffle ?? false;
+  bool get isRepeat => _audioHandler?.isRepeat ?? false;
+  
+  Future<bool> _ensureInitialized() async {
+    if (_isInitialized) return true;
+    
+    print("Waiting for audio service to initialize...");
+
+    if (!_isInitializing) {
+      print("Triggering initialization...");
+      await _initAudioService();
     }
-  }*/
-
-  void pauseAudio() {
-    audioPlayer.pause();
-    _isPlaying = false;
-    notifyListeners();
-  }
-
-  void stopAudio() {
-    audioPlayer.stop();
-    _currentAudio = null;
-    _isPlaying = false;
-    notifyListeners();
-  }
-
-  bool checkPlaying(String audio) {
-    final currentPlaying = audioPlayer.sequenceState?.currentSource;
-    if (currentPlaying is ProgressiveAudioSource) {
-      String? currentUrl = currentPlaying.uri.toString();
-      if (currentUrl == audio) {
-        return true;
-      }
+    
+    final stopwatch = Stopwatch()..start();
+    while (!_isInitialized && stopwatch.elapsed < const Duration(seconds: 10)) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      print("Still waiting for initialization... ${stopwatch.elapsed.inMilliseconds}ms");
     }
-    return false;
+    
+    if (!_isInitialized) {
+      print("Warning: AudioManager not initialized after waiting ${stopwatch.elapsed.inSeconds} seconds");
+      _isInitializing = false;
+      _initAudioService();
+      return false;
+    }
+    
+    print("Audio service initialized successfully!");
+    return true;
   }
-
-  void togglePlayPause() {
-    if (_isPlaying) {
-      pauseAudio();
-    } else {
-      audioPlayer.play();
-      _isPlaying = true;
+  
+  Future<void> toggleShuffle() async {
+    await _ensureInitialized();
+    if (_audioHandler != null) {
+      _audioHandler!.toggleShuffle();
+      _audioHandler!.setShuffleMode(
+        _audioHandler!.isShuffle ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none
+      );
       notifyListeners();
     }
   }
-
-void handleSongEnd() {
-  if(isRepeat){
-      audioPlayer.seek(Duration.zero);
-      return;
-    }else {
-  if (_playlist.length == 1) {
-    pauseAudio(); 
-    return; 
+  
+  Future<void> toggleRepeat() async {
+    await _ensureInitialized();
+    if (_audioHandler != null) {
+      _audioHandler!.toggleRepeat();
+      _audioHandler!.setRepeatMode(
+        _audioHandler!.isRepeat ? AudioServiceRepeatMode.one : AudioServiceRepeatMode.none
+      );
+      notifyListeners();
+    }
   }
-
-  // Ensure we only play next if the player is actually done
- else if (audioPlayer.processingState == ProcessingState.completed) {
-    playNextAudio();
-    return;
-  }}
-}
+  
+  Future<void> setLoading(bool value) async {
+    await _ensureInitialized();
+    _audioHandler?.setLoading(value);
+    notifyListeners();
+  }
+  
   @override
   void dispose() {
-    audioPlayer.dispose();
+    if (_audioHandler != null) {
+      _audioHandler!.isPlayingStream.removeListener(notifyListeners);
+      _audioHandler!.isLoadingStream.removeListener(notifyListeners);
+      _audioHandler!.isBufferingStream.removeListener(notifyListeners);
+      _audioHandler!.currentAudioStream.removeListener(notifyListeners);
+      _audioHandler!.isError.removeListener(notifyListeners);
+    }
     super.dispose();
-  }
-  int randomShuffle (int _currentIndex)
-  {
-    int newIndex;
-  do {
-    newIndex = Random().nextInt(_playlist.length);
-  } while (newIndex == _currentIndex); 
-
-  return newIndex;
   }
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:theway/l10n/app_localizations.dart';
 import '../screens/playerscreen.dart';
 import '../Providers/AudioPlayer.dart';
+import '../Providers/json_theme_provider.dart';
 
 class PersistentPlayer extends StatefulWidget {
   const PersistentPlayer({super.key});
@@ -23,7 +24,6 @@ class _PersistentPlayerState extends State<PersistentPlayer>
     _audioManager = Provider.of<AudioManager>(context, listen: false);
     _audioManager.audioPlayer.playerStateStream.listen((playerState) {
       if (playerState.processingState == ProcessingState.completed) {
-        //print("The Audio has ended");
         _audioManager.handleSongEnd();
       }
       if (playerState.processingState == ProcessingState.buffering ||
@@ -53,13 +53,6 @@ class _PersistentPlayerState extends State<PersistentPlayer>
     super.dispose();
   }
 
-  void _showPlaylists(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return SizedBox();
-        });
-  } //this for playlist managment from the presistant player
 
   void _updateAnimationState() {
     if (_audioManager.isPlaying) {
@@ -74,35 +67,32 @@ class _PersistentPlayerState extends State<PersistentPlayer>
     return Consumer<AudioManager>(
       builder: (context, audioManager, child) {
         if (audioManager.currentAudio == null) {
-          // Return empty if no audio is playing, no widget display
           return const SizedBox.shrink();
         }
-        final audioName =
+        final String? audioName =
             Localizations.localeOf(context).languageCode == 'en' &&
                     audioManager.currentAudio?.audioNameEx != null
-                ? audioManager.currentAudio!.audioNameEx!
+                ? audioManager.currentAudio!.audioNameEx
                 : audioManager.currentAudio!.audioname;
 
         final statusText = audioManager.isLoading
-            ? AppLocalizations.of(context)!.translate("Loading")
+            ? AppLocalizations.of(context)!.translate("Loading"):audioManager.AError!="none"
+            ? AppLocalizations.of(context)!.translate("ErrorSrc")
             : AppLocalizations.of(context)!.translate("NowPlaying");
 
-        // Loading state
         if (audioManager.isLoading) {
           return _buildPlayerContainer(
             context,
             audioManager,
-            audioName,
+            audioName!,
             statusText,
             isLoading: true,
           );
         }
-
-        // Loaded state
         return _buildPlayerContainer(
           context,
           audioManager,
-          audioName,
+          audioName!,
           statusText,
           isLoading: false,
         );
@@ -117,18 +107,21 @@ class _PersistentPlayerState extends State<PersistentPlayer>
     String statusText, {
     required bool isLoading,
   }) {
-    return GestureDetector(
-      onTap: () => _navigateToPlayerScreen(context),
+    return Consumer<JsonThemeProvider>(builder : (context , themeprovider,child){
+            final currentThemeData = themeprovider.themeData;
+      final colorScheme = currentThemeData.colorScheme;
+    return  GestureDetector(
+      onTap: isLoading||audioManager.AError!="none" ? null :() => _navigateToPlayerScreen(context),
       child: Container(
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isLoading
-              ? const Color.fromARGB(255, 10, 19, 33)
-              : Colors.blue[900],
+              ? colorScheme.inversePrimary
+              : colorScheme.primary,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: colorScheme.shadow,
               blurRadius: 8,
               offset: const Offset(0, 4),
             )
@@ -147,7 +140,12 @@ class _PersistentPlayerState extends State<PersistentPlayer>
                         height: 60,
                         child: CircularProgressIndicator(color: Colors.white),
                       )
-                    : Image.network(
+                    :audioManager.AError!="none"?const SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: Icon(Icons.error,color: Colors.white),
+                      ):
+                    Image.network(
                         audioManager.currentAudio!.albumImg,
                         width: 60,
                         height: 60,
@@ -162,8 +160,8 @@ class _PersistentPlayerState extends State<PersistentPlayer>
                 children: [
                   Text(
                     audioName,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style:  TextStyle(
+                      color: isLoading? colorScheme.inverseSurface :colorScheme.surface,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -173,7 +171,7 @@ class _PersistentPlayerState extends State<PersistentPlayer>
                   Text(
                     statusText,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: isLoading? colorScheme.inverseSurface.withOpacity(0.7) :colorScheme.surface.withOpacity(0.7),
                       fontSize: 12,
                     ),
                   ),
@@ -186,13 +184,13 @@ class _PersistentPlayerState extends State<PersistentPlayer>
                 IconButton(
                   icon: Icon(
                     audioManager.isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
+                    color: isLoading? colorScheme.inverseSurface :colorScheme.surface,
                   ),
-                  onPressed: isLoading ? null : audioManager.togglePlayPause,
+                  onPressed: isLoading||audioManager.AError!="none" ? null : audioManager.togglePlayPause,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.stop, color: Colors.white),
-                  onPressed: isLoading ? null : audioManager.stopAudio,
+                  icon:  Icon(Icons.stop, color: isLoading? colorScheme.inverseSurface :colorScheme.surface),
+                  onPressed: isLoading||audioManager.AError!="none" ? null : audioManager.stopAudio,
                 ),
               ],
             ),
@@ -200,6 +198,7 @@ class _PersistentPlayerState extends State<PersistentPlayer>
         ),
       ),
     );
+    }) ;
   }
 
   void _navigateToPlayerScreen(BuildContext context) {

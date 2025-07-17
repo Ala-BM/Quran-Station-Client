@@ -67,7 +67,7 @@ class KhinAudio {
 }
 class KhinAudioAdapter extends TypeAdapter<KhinAudio> {
   @override
-  final int typeId = 0; // Must match the typeId in @HiveType
+  final int typeId = 0; // typeId in @HiveType
 
   @override
   KhinAudio read(BinaryReader reader) {

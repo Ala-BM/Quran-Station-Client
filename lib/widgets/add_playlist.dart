@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:theway/Services/hive_service.dart';
+import 'package:theway/Providers/KhinsiderAlbums.dart';
+import 'package:theway/Providers/hive_service.dart';
 import 'package:theway/l10n/app_localizations.dart';
+import 'package:theway/widgets/playlist_mg.dart';
 
 class AddPlaylist extends StatelessWidget {
-  const AddPlaylist({super.key});
+  final KhinAudio selectedAudio;
+  const AddPlaylist({super.key, required this.selectedAudio});
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +55,16 @@ class AddPlaylist extends StatelessWidget {
             onPressed: () {
               hiveManager.createPlaylist(inputController.text);
               Navigator.pop(context);
+                showDialog(
+                context: context,
+                builder: (context) {
+                  return Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: PlaylistMg(selectedAudio: selectedAudio));//add the selected audio from teh first input
+                },
+              );
             },
             icon: const Icon(Icons.check),
             label: Text(AppLocalizations.of(context)!.translate("Apply")),

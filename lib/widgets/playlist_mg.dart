@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:theway/Classes/KhinsiderAlbums.dart';
-import 'package:theway/Services/hive_service.dart';
+import 'package:theway/Providers/KhinsiderAlbums.dart';
+import 'package:theway/Providers/hive_service.dart';
 import 'package:theway/widgets/add_playlist.dart';
 
 class PlaylistMg extends StatefulWidget {
   final KhinAudio selectedAudio;
-  const PlaylistMg({super.key, required this.selectedAudio});
+  const PlaylistMg( {super.key, required this.selectedAudio});
 
   @override
   State<PlaylistMg> createState() => _PlaylistMgState();
@@ -14,22 +14,28 @@ class PlaylistMg extends StatefulWidget {
 
 class _PlaylistMgState extends State<PlaylistMg> {
   late List<String> playlist;
+  late HiveService hiveManager;
+  @override
+ void initState(){
+ 
+    super.initState();
+ }
 
   @override
   void didChangeDependencies() {
-    final hiveManager = Provider.of<HiveService>(context);
+    hiveManager = Provider.of<HiveService>(context);
     playlist = hiveManager.getAllPlaylists();
-    print(playlist);
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
-    final hiveManager = Provider.of<HiveService>(context);
-    return Padding(
+   
+    return Consumer<HiveService>(builder: (context,hiveManager,child){
+      return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Prevents unnecessary space
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
@@ -39,7 +45,7 @@ class _PlaylistMgState extends State<PlaylistMg> {
           const SizedBox(height: 10),
           playlist.isEmpty
               ? SizedBox(
-                  width: double.infinity, // Takes full width of the modal
+                  width: double.infinity, 
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -55,50 +61,53 @@ class _PlaylistMgState extends State<PlaylistMg> {
                   ),
                 )
               : SizedBox(
-                  height: 200, // Limit height
+                  height: 200,
                   child: ListView.builder(
-  shrinkWrap: true,
-  itemCount: playlist.length,
-  itemBuilder: (context, index) {
-    bool isSelected = hiveManager
-        .returnPlaylist(widget.selectedAudio.audioname)
-        .contains(playlist[index]);
+                    shrinkWrap: true,
+                    itemCount: playlist.length,
+                    itemBuilder: (context, index) {
+                      bool isSelected = hiveManager
+                          .returnPlaylist(widget.selectedAudio.audioname)
+                          .contains(playlist[index]);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
-      child: Material(
-        elevation: isSelected ? 4 : 2, // Elevation for depth
-        borderRadius: BorderRadius.circular(12),
-        color: isSelected ? Colors.blue : Colors.white,
-        child: ListTile(
-          title: Text(
-            playlist[index],
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          onTap: () {
-            hiveManager.addToPlaylist(playlist[index], widget.selectedAudio);
-            Navigator.pop(context);
-          },
-          trailing: Icon(
-            Icons.add,
-            color: isSelected ? Colors.white : Colors.blue,
-          ),
-        ),
-      ),
-    );
-  },
-)
-,
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 3, horizontal: 10),
+                        child: Material(
+                          elevation: isSelected ? 4 : 2, 
+                          borderRadius: BorderRadius.circular(12),
+                          color: isSelected ? Colors.blue : Colors.white,
+                          child: ListTile(
+                            title: Text(
+                              playlist[index],
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.black,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                            onTap: () {
+                              hiveManager.addToPlaylist(
+                                  playlist[index], widget.selectedAudio);
+                              Navigator.pop(context);
+                            },
+                            trailing: Icon(
+                              Icons.add,
+                              color: isSelected ? Colors.white : Colors.blue,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
 
           const SizedBox(height: 10),
 
-          // Add New Button
           TextButton.icon(
             onPressed: () {
+              Navigator.pop(context);
               showDialog(
                 context: context,
                 builder: (context) {
@@ -106,10 +115,9 @@ class _PlaylistMgState extends State<PlaylistMg> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
                       ),
-                      child: const AddPlaylist());
+                      child:  AddPlaylist( selectedAudio: widget.selectedAudio,));
                 },
               );
-              // Show input field to add a new playlist
             },
             icon: const Icon(Icons.add, color: Colors.blue),
             label: const Text("Create New Playlist",
@@ -118,5 +126,6 @@ class _PlaylistMgState extends State<PlaylistMg> {
         ],
       ),
     );
+    });
   }
 }

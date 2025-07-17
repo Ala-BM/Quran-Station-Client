@@ -1,5 +1,7 @@
-package com.example.q_station_c
+package com.example.theway
 
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity: FlutterActivity()
+class MainActivity: FlutterActivity() {
+
+}

@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../Classes/audioPlayer.dart'; // Import AudioManager
-import '../Classes/KhinsiderAlbums.dart'; // Import KhinAudio
+import 'package:theway/Classes/audioPlayer.dart'; // Import AudioManager
+import 'package:theway/Providers/KhinsiderAlbums.dart'; // Import KhinAudio
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 
 class Playerscreen extends StatefulWidget {

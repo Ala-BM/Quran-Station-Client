@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:theway/l10n/app_localizations.dart';
 class LiveIndicator extends StatefulWidget {
   const LiveIndicator({super.key});
 
@@ -15,19 +15,17 @@ class _LiveIndicatorState extends State<LiveIndicator>
   @override
   void initState() {
     super.initState();
-
-    // Controls the blink
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
-    )..repeat(reverse: true); // Makes it blink back and forth
+    )..repeat(reverse: true); 
 
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.2).animate(_controller);
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // Always dispose animation controllers!
+    _controller.dispose(); 
     super.dispose();
   }
 
@@ -48,9 +46,9 @@ class _LiveIndicatorState extends State<LiveIndicator>
           ),
         ),
         const SizedBox(width: 8),
-        const Text(
-          "Live Broadcast",
-          style: TextStyle(
+         Text(
+          AppLocalizations.of(context)!.translate("Broadcasting"),
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
             color: Colors.black87,
