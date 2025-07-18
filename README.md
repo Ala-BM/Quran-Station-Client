@@ -4,15 +4,9 @@ A mobile client for https://quran-station.com, built with Flutter.
 
 ## Features
 - Simple and responsive UI  
-- Auto playlist  
-- Filtering  
-- Favourites  
-- Custom playlists  
-- Audio controller
+- Audioo playlists with Favourites feature
+- Audio filtering with Search options 
 - Arabic and English Languages  
-
-## Planned Features
 - Background audio playback  
-- Improved playlist management  
-- Settings screen  
-- Enhanced UI  
+- Playlist management  
+ 
