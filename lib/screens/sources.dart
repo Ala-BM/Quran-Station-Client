@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:theway/screens/settings.dart';
+import 'package:theway/widgets/blur_ani.dart';
+import 'package:theway/widgets/fade_ani.dart';
 import 'package:theway/widgets/presistantplayer.dart';
 import '../widgets/switchscreen.dart';
 import '../widgets/qs_list.dart';
-import '../widgets/qs_list_fav.dart'; 
-import '../widgets/theme_settings.dart';// Import your favorites screen
+import '../widgets/qs_list_fav.dart';
 
 class Sources extends StatefulWidget {
   const Sources({super.key, required this.onLanguageChange});
   final void Function(Locale locale) onLanguageChange;
-  
+ 
   @override
   State<Sources> createState() => _SourcesState();
 }
 
 class _SourcesState extends State<Sources> {
+
   final GlobalKey _switchScreenKey = GlobalKey();
   double _switchScreenHeight = 0;
-  int _currentIndex = 1; 
+  int _currentIndex = 1;
   PageController? _pageController;
 
   @override
@@ -44,7 +46,7 @@ class _SourcesState extends State<Sources> {
 
   void _onTabChanged(int index) {
     if (_pageController == null) return;
-    
+   
     setState(() {
       _currentIndex = index;
     });
@@ -60,68 +62,67 @@ class _SourcesState extends State<Sources> {
       _currentIndex = index;
     });
   }
-
-  Widget _buildSettingsScreen() {
-    return const Center(
-      child: Text(
-        'Settings Screen',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-    );
+  void _handleLanguageToggle([String? lang]) {
+    final blurAni = BlurAni.of(context);
+    blurAni?.blurTransition(() {
+      widget.onLanguageChange(
+        lang != null?  Locale(lang): Localizations.localeOf(context).languageCode == 'en'?
+            const Locale('ar'):
+             const Locale('en')
+      );
+    });
   }
-
   List<Widget> _getScreens() {
     return [
-      QsListFav(onLanguageChange: widget.onLanguageChange), // Favorites
-      Qslist(onLanguageChange: widget.onLanguageChange),    // Browse
-      Settings(onLanguageChange: widget.onLanguageChange),  //Settings                             // Settings
+      QsListFav(onLanguageChange: _handleLanguageToggle), 
+      Qslist(onLanguageChange: _handleLanguageToggle),    
+      Settings(onLanguageChange: _handleLanguageToggle),                            
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black,
-                      width: 2,
+   return Scaffold(
+        body: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 2,
+                      ),
                     ),
+                    child: _pageController == null
+                        ? Qslist(onLanguageChange: _handleLanguageToggle)
+                        : PageView(
+                            controller: _pageController!,
+                            onPageChanged: _onPageChanged,
+                            children: _getScreens(),
+                            reverse: Directionality.of(context) == TextDirection.rtl,
+                          )
                   ),
-                  child: _pageController == null 
-                    ? Qslist(onLanguageChange: widget.onLanguageChange)
-                    :  PageView(
-                        controller: _pageController!,
-                        onPageChanged: _onPageChanged,
-                        children: _getScreens(),
-                        reverse: Directionality.of(context) == TextDirection.rtl,
-                        
-      
-                    )
                 ),
-              ),
-              Container(
-                key: _switchScreenKey,
-                child: Switchscreen(
-                  onTabChanged: _onTabChanged,
-                  currentIndex: _currentIndex,
+                Container(
+                  key: _switchScreenKey,
+                  child: Switchscreen(
+                    onTabChanged: _onTabChanged,
+                    currentIndex: _currentIndex,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: _switchScreenHeight,
-            child: const PersistentPlayer(),
-          ),
-        ],
-      ),
-    );
+              ],
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: _switchScreenHeight,
+              child: const PersistentPlayer(),
+            ),
+          ],
+        ),
+      );
+  
   }
 }

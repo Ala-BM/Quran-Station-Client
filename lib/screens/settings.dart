@@ -5,7 +5,7 @@ import 'package:theway/l10n/app_localizations.dart';
 import 'package:theway/widgets/theme_settings.dart';
 
 class Settings extends StatefulWidget {
-  final void Function(Locale locale) onLanguageChange;
+  final void Function([String]) onLanguageChange;
   const Settings({super.key, required this.onLanguageChange});
   @override
   State<Settings> createState() => _SettingsState();
@@ -143,7 +143,7 @@ class _SettingsState extends State<Settings> {
                                 onChanged: (value) {
                                   setState(() {
                                     selectedLanguage = value!;
-                                    widget.onLanguageChange(const Locale('en'));
+                                    widget.onLanguageChange("en");
                                   });
                                 },
                               ),
@@ -158,7 +158,7 @@ class _SettingsState extends State<Settings> {
                                 onChanged: (value) {
                                   setState(() {
                                     selectedLanguage = value!;
-                                   widget.onLanguageChange(const Locale('ar'));
+                                   widget.onLanguageChange("ar");
                                   });
                                 },
                               ),

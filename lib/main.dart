@@ -10,6 +10,7 @@ import 'package:theway/Providers/json_theme_provider.dart';
 import 'package:theway/screens/sources.dart';
 import 'package:theway/l10n/app_localizations.dart';
 import 'package:theway/Providers/hive_service.dart';
+import 'package:theway/widgets/blur_ani.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,12 +74,12 @@ class _MyAppState extends State<MyApp> {
         }
         return supportedLocales.first;
       },
-      title: 'Flutter Demo',
+      title: 'Q Station',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Sources(onLanguageChange: _changeLanguage),
+      home: BlurAni(child: Sources(onLanguageChange: _changeLanguage)), 
     );
   }
 }

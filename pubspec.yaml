@@ -58,6 +58,13 @@ dependencies:
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.0
+
+flutter_native_splash:
+  color: "#ffffff"  # background color
+  image: assets/icons/logo.png  # your logo # optional, for footer branding
+  android: true
+  ios: true
 
 flutter_launcher_icons:
   android: true

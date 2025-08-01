@@ -8,7 +8,7 @@
     <uses-permission android:name="miui.permission.USE_INTERNAL_GENERAL_API" /> 
 
     <application
-        android:label="QS Station"
+        android:label="QS Client"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"
          android:networkSecurityConfig="@xml/network_security_config">

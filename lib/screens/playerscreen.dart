@@ -200,12 +200,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
                         duration != Duration.zero
                             ? SliderTheme(
                                 data: SliderTheme.of(context).copyWith(
-                                  trackHeight: 4.0, // Thinner track
-                                  inactiveTrackColor: colorScheme.inversePrimary, // Background color
+                                  trackHeight: 4.0, 
+                                  inactiveTrackColor: colorScheme.inversePrimary, 
                                   activeTrackColor:
-                                      colorScheme.primary, // Played progress
+                                      colorScheme.primary, 
                                   thumbColor:
-                                      colorScheme.secondary, // Thumb color
+                                      colorScheme.secondary, 
                                   overlayColor:
                                       colorScheme.primary.withOpacity(0.2),
                                 ),
