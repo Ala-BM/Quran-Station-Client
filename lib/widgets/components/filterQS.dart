@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:theway/Providers/hive_service.dart';
 import 'package:theway/l10n/app_localizations.dart';
-import '../Services/qsscrapper.dart';
+import '../../Services/qsscrapper.dart';
 
 class Filterqs extends StatefulWidget {
    const Filterqs({

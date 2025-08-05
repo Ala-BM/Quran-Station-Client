@@ -34,20 +34,14 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   bool get isLoading => _isLoading;
 
 MyAudioHandler() {
-  print("MyAudioHandler constructor called");
   _init();
-  print("MyAudioHandler initialization complete");
 }
 
 void _init() {
-  print("Initializing audio player in MyAudioHandler");
   _player.playbackEventStream.listen(_broadcastState, onError: (e) {
-    print("Error from playback event stream: $e");
   });
 
   _player.playerStateStream.listen((state) {
-    print("Player state changed: ${state.processingState}, playing: ${state.playing}");
-    
     if (state.processingState == ProcessingState.completed) {
       handleSongEnd();
     }
@@ -57,8 +51,6 @@ void _init() {
   }, onError: (e) {
     print("Error from player state stream: $e");
   });
-  
-  print("Audio player streams initialized");
 }
 
   Future<void> loadPlaylist(List<KhinAudio> audios) async {
@@ -301,7 +293,6 @@ Future<void> playAudio(KhinAudio? audio) async {
     else {
       _isError.value="none";
     }
-    print("ffffffffffffffffffff ${_isError.value}");
     
   }
 

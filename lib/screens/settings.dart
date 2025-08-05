@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:theway/Providers/json_theme_provider.dart';
 import 'package:theway/l10n/app_localizations.dart';
-import 'package:theway/widgets/theme_settings.dart';
+import 'package:theway/screens/theme_settings.dart';
 
 class Settings extends StatefulWidget {
   final void Function([String]) onLanguageChange;

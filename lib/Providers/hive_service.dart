@@ -10,7 +10,6 @@ static Future<void> initBox() async {
   playlistBox = await Hive.openBox<dynamic>('playlists');
   fav = await Hive.openBox<Map<dynamic, dynamic>>('favorites');
 
- // print("Existing Playlists: ${playlistBox.keys.toList()}");
 
 
 }
@@ -21,7 +20,6 @@ static Future<void> initBox() async {
   }
 
   void removeFavorite(String url) {
-    debugPrint("PLEASE WORK FOR EVERYONE'S SAKE");
     fav.delete(url);
     notifyListeners();
   }

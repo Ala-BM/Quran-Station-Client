@@ -18,14 +18,11 @@ class AudioManager extends ChangeNotifier {
   Future<void> _initAudioService() async {
 
     if (_isInitialized || _isInitializing) return;
-    
     _isInitializing = true;
-    print("Starting audio service initialization...");
     
     try {
       final handler = await AudioService.init(
         builder: () {
-          print("Building audio handler...");
           return MyAudioHandler();
         },
         config:  const AudioServiceConfig(
@@ -36,7 +33,6 @@ class AudioManager extends ChangeNotifier {
         ),
       );
       
-      print("Audio handler created successfully!");
       _audioHandler = handler;
       _audioHandler!.isPlayingStream.addListener(() {
         print("Play state changed: ${_audioHandler!.isPlayingStream.value}");
@@ -68,7 +64,6 @@ class AudioManager extends ChangeNotifier {
       
       _isInitialized = true;
       _isInitializing = false;
-      print("Audio service initialization complete!");
       notifyListeners();
     } catch (e) {
       _isInitializing = false;
@@ -136,29 +131,21 @@ _audioHandler?.handleSongEnd();
   bool get isRepeat => _audioHandler?.isRepeat ?? false;
   
   Future<bool> _ensureInitialized() async {
-    if (_isInitialized) return true;
-    
-    print("Waiting for audio service to initialize...");
-
+    if (_isInitialized) return true; 
     if (!_isInitializing) {
-      print("Triggering initialization...");
       await _initAudioService();
     }
     
     final stopwatch = Stopwatch()..start();
     while (!_isInitialized && stopwatch.elapsed < const Duration(seconds: 10)) {
       await Future.delayed(const Duration(milliseconds: 200));
-      print("Still waiting for initialization... ${stopwatch.elapsed.inMilliseconds}ms");
     }
     
     if (!_isInitialized) {
-      print("Warning: AudioManager not initialized after waiting ${stopwatch.elapsed.inSeconds} seconds");
       _isInitializing = false;
       _initAudioService();
       return false;
     }
-    
-    print("Audio service initialized successfully!");
     return true;
   }
   

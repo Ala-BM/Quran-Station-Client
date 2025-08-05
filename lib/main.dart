@@ -10,7 +10,7 @@ import 'package:theway/Providers/json_theme_provider.dart';
 import 'package:theway/screens/sources.dart';
 import 'package:theway/l10n/app_localizations.dart';
 import 'package:theway/Providers/hive_service.dart';
-import 'package:theway/widgets/blur_ani.dart';
+import 'package:theway/widgets/animations/blur_ani.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

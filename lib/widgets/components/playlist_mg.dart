@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:theway/Providers/KhinsiderAlbums.dart';
 import 'package:theway/Providers/hive_service.dart';
-import 'package:theway/widgets/add_playlist.dart';
+import 'package:theway/widgets/components/add_playlist.dart';
 
 class PlaylistMg extends StatefulWidget {
   final KhinAudio selectedAudio;

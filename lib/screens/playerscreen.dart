@@ -4,12 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:theway/Providers/KhinsiderAlbums.dart';
 import 'package:theway/Providers/json_theme_provider.dart';
 import 'package:theway/Providers/cnx_plus_provider.dart';
-import 'package:theway/widgets/playlist_mg.dart';
+import 'package:theway/widgets/components/playlist_mg.dart';
 import '../Providers/hive_service.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:theway/l10n/app_localizations.dart';
 import '../Providers/AudioPlayer.dart';
-import 'package:theway/widgets/live_indicator.dart';
+import 'package:theway/widgets/components/live_indicator.dart';
 
 class PlayerScreen extends StatefulWidget {
   const PlayerScreen({super.key});

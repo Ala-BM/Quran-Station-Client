@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:theway/Providers/KhinsiderAlbums.dart';
 import 'package:theway/Providers/hive_service.dart';
 import 'package:theway/l10n/app_localizations.dart';
-import 'package:theway/widgets/playlist_mg.dart';
+import 'package:theway/widgets/components/playlist_mg.dart';
 
 class AddPlaylist extends StatelessWidget {
   final KhinAudio selectedAudio;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:theway/screens/settings.dart';
-import 'package:theway/widgets/blur_ani.dart';
-import 'package:theway/widgets/fade_ani.dart';
-import 'package:theway/widgets/presistantplayer.dart';
+import 'package:theway/widgets/animations/blur_ani.dart';
+import 'package:theway/widgets/animations/fade_ani.dart';
+import 'package:theway/widgets/components/presistantplayer.dart';
 import '../widgets/switchscreen.dart';
 import '../widgets/qs_list.dart';
 import '../widgets/qs_list_fav.dart';

@@ -20,16 +20,9 @@ class JsonThemeProvider extends ChangeNotifier {
 
   Future<void> _initializeThemes() async {
     try {
-      // Initialize Hive box
       _settingsBox = await Hive.openBox('settings');
-      
-      // Load themes from JSON
       _availableThemes = await JsonThemeLoader.loadThemes();
-      
-      // Load saved theme preference
       _currentTheme = _settingsBox.get('theme', defaultValue: 'Light');
-      
-      // Set initial theme
       if (_availableThemes.containsKey(_currentTheme)) {
         _themeData = _availableThemes[_currentTheme]!;
       } else {
@@ -50,30 +43,22 @@ class JsonThemeProvider extends ChangeNotifier {
     if (_availableThemes.containsKey(themeName)) {
       _currentTheme = themeName;
       _themeData = _availableThemes[themeName]!;
-      
-      // Save to Hive
       await _settingsBox.put('theme', themeName);
       
       notifyListeners();
     }
   }
-
-  // Method to reload themes (useful for hot reload during development)
-  Future<void> reloadThemes() async {
+  /*Future<void> reloadThemes() async {
     _availableThemes = await JsonThemeLoader.loadThemes();
     if (_availableThemes.containsKey(_currentTheme)) {
       _themeData = _availableThemes[_currentTheme]!;
     }
     notifyListeners();
-  }
-
-  // Method to add custom theme at runtime
+  }*/
   void addCustomTheme(String name, ThemeData theme) {
     _availableThemes[name] = theme;
     notifyListeners();
   }
-
-  // Method to get theme colors for preview
   Map<String, Color> getThemeColors(String themeName) {
     if (!_availableThemes.containsKey(themeName)) return {};
     

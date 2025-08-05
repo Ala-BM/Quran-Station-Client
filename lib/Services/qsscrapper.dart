@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../Providers/KhinsiderAlbums.dart';
 import 'package:http/http.dart' as http;
 
-// Custom exception class for better error handling
 class QSScrapperException implements Exception {
   final String message;
   final QSErrorType type;
@@ -29,10 +28,8 @@ enum QSErrorType {
 class Qsscrapper {
   ValueNotifier<int> station = ValueNotifier<int>(1);
   
-  // Configurable timeout duration
   static const Duration _requestTimeout = Duration(seconds: 15);
   
-  // Common headers for requests
   static const Map<String, String> _commonHeaders = {
     "Accept": "*/*",
     "RSC": "1",
@@ -254,7 +251,6 @@ class Qsscrapper {
         );
       }
 
-      // Find the matching closing bracket for the array
       final arrayStart = responseBody.indexOf('[', startIndex);
       if (arrayStart == -1) {
         throw QSScrapperException(

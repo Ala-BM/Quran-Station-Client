@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 import 'package:theway/l10n/app_localizations.dart';
-import '../screens/playerscreen.dart';
-import '../Providers/AudioPlayer.dart';
-import '../Providers/json_theme_provider.dart';
+import '../../screens/playerscreen.dart';
+import '../../Providers/AudioPlayer.dart';
+import '../../Providers/json_theme_provider.dart';
 
 class PersistentPlayer extends StatefulWidget {
   const PersistentPlayer({super.key});

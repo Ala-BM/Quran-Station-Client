@@ -4,12 +4,12 @@ import 'package:just_audio/just_audio.dart';
 import 'package:theway/Providers/hive_service.dart';
 import 'package:theway/Providers/cnx_plus_provider.dart';
 import 'package:theway/Providers/json_theme_provider.dart';
-import 'package:theway/widgets/error_handle.dart';
+import 'package:theway/widgets/components/error_handle.dart';
 import '../Providers/KhinsiderAlbums.dart';
 import '../Services/qsscrapper.dart';
-import 'filterQS.dart';
-import 'search_bar.dart';
-import 'audio_list.dart';
+import 'components/filterQS.dart';
+import 'components/search_bar.dart';
+import 'components/audio_list.dart';
 import 'package:provider/provider.dart';
 
 class Qslist extends StatefulWidget {
